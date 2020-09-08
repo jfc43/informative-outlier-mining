@@ -61,7 +61,7 @@ parser.add_argument('--layers', default=100, type=int,
                     help='total number of layers (default: 100)')
 parser.add_argument('--depth', default=40, type=int,
                     help='depth of resnet')
-parser.add_argument('--width', default=2, type=int,
+parser.add_argument('--width', default=4, type=int,
                     help='width of resnet')
 
 parser.set_defaults(argument=True)
