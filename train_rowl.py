@@ -159,7 +159,7 @@ def main():
     else:
         assert False, 'Not supported model arch: {}'.format(args.model_arch)
 
-    attack = LinfPGDAttack(model = model, eps=args.epsilon, nb_iter=args.iters, eps_iter=args.iter_size, rand_init=True, targeted=True, num_classes=num_classes+1, loss_func='CE')
+    attack = LinfPGDAttack(model = model, eps=args.epsilon, nb_iter=args.iters, eps_iter=args.iter_size, rand_init=True, targeted=True, num_classes=num_classes+1, loss_func='CE', elementwise_best=True)
 
     # get the number of model parameters
     print('Number of model parameters: {}'.format(

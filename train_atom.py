@@ -189,7 +189,7 @@ def main():
         else:
             assert False, "=> no checkpoint found at '{}'".format(args.resume)
 
-    attack_out = LinfPGDAttack(model = model, eps=args.epsilon, nb_iter=args.iters, eps_iter=args.iter_size, targeted=False, rand_init=True, num_classes=num_classes+1, loss_func='CE')
+    attack_out = LinfPGDAttack(model = model, eps=args.epsilon, nb_iter=args.iters, eps_iter=args.iter_size, targeted=False, rand_init=True, num_classes=num_classes+1, loss_func='CE', elementwise_best=True)
 
     # get the number of model parameters
     print('Number of model parameters: {}'.format(
