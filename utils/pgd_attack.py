@@ -77,15 +77,12 @@ class LinfPGDAttack:
             worst_perb = delta.data.clone()
 
         if self.rand_init:
-            # start_pert_ratio = torch.FloatTensor(x.shape[0],1,1,1).uniform_(0,1)
             delta.data.uniform_(-self.eps, self.eps)
-            # delta.data *= start_pert_ratio
             delta.data = torch.round(delta.data)
             delta.data = (torch.clamp(x.data + delta.data / 255.0, min=self.clip_min, max=self.clip_max) - x.data) * 255.0
 
         for ii in range(self.nb_iter):
             adv_x = x + delta / 255.0
-
             outputs = self.model(adv_x)
 
             if self.targeted:
@@ -93,6 +90,11 @@ class LinfPGDAttack:
                 loss = -self.loss_func(outputs, target)
             else:
                 loss = self.loss_func(outputs, y)
+
+            if self.elementwise_best:
+                cond = loss.data > worst_loss
+                worst_loss[cond] = loss.data[cond]
+                worst_perb[cond] = delta.data[cond]
 
             loss.mean().backward()
             grad_sign = delta.grad.data.sign()
@@ -102,12 +104,20 @@ class LinfPGDAttack:
 
             delta.grad.data.zero_()
 
-            if self.elementwise_best:
-                cond = loss.data > worst_loss
-                worst_loss[cond] = loss.data[cond]
-                worst_perb[cond] = delta.data[cond]
-
         if self.elementwise_best:
+            adv_x = x + delta / 255.0
+            outputs = self.model(adv_x)
+
+            if self.targeted:
+                target = ((y + torch.randint(1, self.num_classes, y.shape).cuda()) % self.num_classes).long()
+                loss = -self.loss_func(outputs, target)
+            else:
+                loss = self.loss_func(outputs, y)
+
+            cond = loss.data > worst_loss
+            worst_loss[cond] = loss.data[cond]
+            worst_perb[cond] = delta.data[cond]
+
             adv_x = x + worst_perb / 255.0
         else:
             adv_x = x + delta.data / 255.0

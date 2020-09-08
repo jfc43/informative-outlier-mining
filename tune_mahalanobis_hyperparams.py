@@ -1,7 +1,6 @@
 from __future__ import print_function
 import argparse
 import os
-
 import sys
 
 import torch
@@ -18,8 +17,13 @@ import models.wideresnet as wn
 import utils.svhn_loader as svhn
 import numpy as np
 import time
+import utils.svhn_loader as svhn
 from scipy import misc
-from utils import metric, sample_estimator, get_Mahalanobis_score, TinyImages
+from utils import softmax, metric, sample_estimator, get_Mahalanobis_score, TinyImages
+
+torch.manual_seed(1)
+torch.cuda.manual_seed(1)
+np.random.seed(1)
 
 parser = argparse.ArgumentParser(description='Pytorch Detecting Out-of-distribution examples in neural networks')
 
@@ -28,7 +32,8 @@ parser.add_argument('--name', required=True, type=str,
                     help='neural network name and training set')
 parser.add_argument('--model-arch', default='densenet', type=str, help='model architecture')
 
-parser.add_argument('--gpu', default = '0', type = str, help='gpu index')
+parser.add_argument('--gpu', default = '0', type = str,
+		    help='gpu index')
 parser.add_argument('--epochs', default=100, type=int,
                     help='number of total epochs to run')
 
@@ -67,7 +72,7 @@ def tune_mahalanobis_hyperparams():
     print('Tuning hyper-parameters...')
     stypes = ['mahalanobis']
 
-    save_dir = os.path.join('output/hyperparams/', args.in_dataset, args.name, 'tmp')
+    save_dir = os.path.join('output/mahalanobis_hyperparams/', args.in_dataset, args.name, 'tmp')
 
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -93,7 +98,7 @@ def tune_mahalanobis_hyperparams():
             transforms.ToTensor(),
         ])
 
-        trainset= torchvision.datasets.CIFAR100('./datasets/cifar10', train=True, download=True, transform=transform)
+        trainset= torchvision.datasets.CIFAR100('./datasets/cifar100', train=True, download=True, transform=transform)
         trainloaderIn = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=2)
 
         testset = torchvision.datasets.CIFAR100(root='./datasets/cifar100', train=False, download=True, transform=transform)
@@ -101,10 +106,20 @@ def tune_mahalanobis_hyperparams():
 
         num_classes = 100
 
-    valloaderOut = torch.utils.data.DataLoader(TinyImages(transform=transforms.Compose(
-        [transforms.ToTensor(), transforms.ToPILImage(), transforms.RandomCrop(32, padding=4),
-         transforms.RandomHorizontalFlip(), transforms.ToTensor()])),
-        batch_size=args.batch_size, shuffle=True, num_workers=2)
+    elif args.in_dataset == "SVHN":
+
+        normalizer = None
+        trainloaderIn = torch.utils.data.DataLoader(
+            svhn.SVHN('datasets/svhn/', split='train',
+                                      transform=transforms.ToTensor(), download=False),
+            batch_size=args.batch_size, shuffle=True)
+        testloaderIn = torch.utils.data.DataLoader(
+            svhn.SVHN('datasets/svhn/', split='test',
+                                  transform=transforms.ToTensor(), download=False),
+            batch_size=args.batch_size, shuffle=True)
+
+        args.epochs = 20
+        num_classes = 10
 
     if args.model_arch == 'densenet':
         model = dn.DenseNet3(args.layers, num_classes, normalizer=normalizer)
@@ -135,6 +150,11 @@ def tune_mahalanobis_hyperparams():
 
     print('train logistic regression model')
     m = 500
+
+    train_in = []
+    train_in_label = []
+    train_out = []
+
     val_in = []
     val_in_label = []
     val_out = []
@@ -144,16 +164,47 @@ def tune_mahalanobis_hyperparams():
         data = data.numpy()
         target = target.numpy()
         for x, y in zip(data, target):
-            val_in.append(x)
-            val_in_label.append(y)
             cnt += 1
-            if cnt == m:
+            if cnt <= m:
+                train_in.append(x)
+                train_in_label.append(y)
+            elif cnt <= 2*m:
+                val_in.append(x)
+                val_in_label.append(y)
+
+            if cnt == 2*m:
                 break
-        if cnt == m:
+        if cnt == 2*m:
             break
+
+    print('In', len(train_in), len(val_in))
 
     criterion = nn.CrossEntropyLoss().cuda()
     adv_noise = 0.05
+
+    for i in range(int(m/args.batch_size) + 1):
+        if i*args.batch_size >= m:
+            break
+        data = torch.tensor(train_in[i*args.batch_size:min((i+1)*args.batch_size, m)])
+        target = torch.tensor(train_in_label[i*args.batch_size:min((i+1)*args.batch_size, m)])
+        data = data.cuda()
+        target = target.cuda()
+        data, target = Variable(data, volatile=True), Variable(target)
+        output = model(data)
+
+        model.zero_grad()
+        inputs = Variable(data.data, requires_grad=True).cuda()
+        output = model(inputs)
+        loss = criterion(output, target)
+        loss.backward()
+
+        gradient = torch.ge(inputs.grad.data, 0)
+        gradient = (gradient.float()-0.5)*2
+
+        adv_data = torch.add(input=inputs.data, other=gradient, alpha=adv_noise)
+        adv_data = torch.clamp(adv_data, 0.0, 1.0)
+
+        train_out.extend(adv_data.cpu().numpy())
 
     for i in range(int(m/args.batch_size) + 1):
         if i*args.batch_size >= m:
@@ -174,18 +225,18 @@ def tune_mahalanobis_hyperparams():
         gradient = torch.ge(inputs.grad.data, 0)
         gradient = (gradient.float()-0.5)*2
 
-        adv_data = torch.add(inputs.data, adv_noise, gradient)
+        adv_data = torch.add(input=inputs.data, other=gradient, alpha=adv_noise)
         adv_data = torch.clamp(adv_data, 0.0, 1.0)
 
         val_out.extend(adv_data.cpu().numpy())
 
-    print(len(val_in),len(val_out))
+    print('Out', len(train_out),len(val_out))
 
     train_lr_data = []
     train_lr_label = []
-    train_lr_data.extend(val_in)
+    train_lr_data.extend(train_in)
     train_lr_label.extend(np.zeros(m))
-    train_lr_data.extend(val_out)
+    train_lr_data.extend(train_out)
     train_lr_label.extend(np.ones(m))
     train_lr_data = torch.tensor(train_lr_data)
     train_lr_label = torch.tensor(train_lr_label)
@@ -193,7 +244,7 @@ def tune_mahalanobis_hyperparams():
     best_fpr = 1.1
     best_magnitude = 0.0
 
-    for magnitude in np.arange(0, 0.0041, 0.004/20):
+    for magnitude in [0.0, 0.01, 0.005, 0.002, 0.0014, 0.001, 0.0005]:
         train_lr_Mahalanobis = []
         total = 0
         for data_index in range(int(np.floor(train_lr_data.size(0) / args.batch_size))):
@@ -203,14 +254,14 @@ def tune_mahalanobis_hyperparams():
             train_lr_Mahalanobis.extend(Mahalanobis_scores)
 
         train_lr_Mahalanobis = np.asarray(train_lr_Mahalanobis, dtype=np.float32)
-
-        regressor = LogisticRegressionCV().fit(train_lr_Mahalanobis, train_lr_label)
+        regressor = LogisticRegressionCV(n_jobs=-1).fit(train_lr_Mahalanobis, train_lr_label)
 
         print('Logistic Regressor params:', regressor.coef_, regressor.intercept_)
 
         t0 = time.time()
         f1 = open(os.path.join(save_dir, "confidence_mahalanobis_In.txt"), 'w')
         f2 = open(os.path.join(save_dir, "confidence_mahalanobis_Out.txt"), 'w')
+
     ########################################In-distribution###########################################
         print("Processing in-distribution images")
 
@@ -221,9 +272,7 @@ def tune_mahalanobis_hyperparams():
             images = torch.tensor(val_in[i * args.batch_size : min((i+1) * args.batch_size, m)]).cuda()
             # if j<1000: continue
             batch_size = images.shape[0]
-
             Mahalanobis_scores = get_Mahalanobis_score(images, model, num_classes, sample_mean, precision, num_output, magnitude)
-
             confidence_scores= regressor.predict_proba(Mahalanobis_scores)[:, 1]
 
             for k in range(batch_size):
@@ -275,7 +324,7 @@ def tune_mahalanobis_hyperparams():
 if __name__ == '__main__':
     sample_mean, precision, best_regressor, best_magnitude = tune_mahalanobis_hyperparams()
     print('saving results...')
-    save_dir = os.path.join('output/hyperparams/', args.in_dataset, args.name)
+    save_dir = os.path.join('output/mahalanobis_hyperparams/', args.in_dataset, args.name)
 
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
