@@ -160,7 +160,7 @@ def tune_mahalanobis_hyperparams():
     val_out = []
 
     cnt = 0
-    for data, target in trainloaderIn:
+    for data, target in testloaderIn:
         data = data.numpy()
         target = target.numpy()
         for x, y in zip(data, target):
