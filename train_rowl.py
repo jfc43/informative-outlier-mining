@@ -16,6 +16,7 @@ import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision
+import utils.svhn_loader as svhn
 import numpy as np
 
 import models.densenet as dn
@@ -131,9 +132,7 @@ def main():
             batch_size=args.batch_size, shuffle=True, **kwargs)
 
         num_classes = 10
-
         lr_schedule=[50, 75, 90]
-
     elif args.in_dataset == "CIFAR-100":
         # Data loading code
         normalizer = transforms.Normalize(mean=[x/255.0 for x in [125.3, 123.0, 113.9]],
@@ -147,8 +146,23 @@ def main():
             batch_size=args.batch_size, shuffle=True, **kwargs)
 
         num_classes = 100
-
         lr_schedule=[50, 75, 90]
+    elif args.in_dataset == "SVHN":
+        # Data loading code
+        normalizer = None
+        transform = transforms.Compose([transforms.ToTensor(),])
+        train_loader = torch.utils.data.DataLoader(
+            torchvision.datasets.ImageFolder('./datasets/row_train_data/SVHN', transform=transform),
+            batch_size=args.batch_size, shuffle=True, **kwargs)
+        val_loader = torch.utils.data.DataLoader(
+            svhn.SVHN('datasets/svhn/', split='test',
+                                  transform=transforms.ToTensor(), download=False),
+            batch_size=args.batch_size, shuffle=False, **kwargs)
+
+        args.epochs = 20
+        args.save_epoch = 2
+        lr_schedule=[10, 15, 18]
+        num_classes = 10
 
     # create model
     if args.model_arch == 'densenet':

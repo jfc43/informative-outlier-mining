@@ -21,7 +21,7 @@ import numpy as np
 import models.densenet as dn
 import models.wideresnet as wn
 from utils import LinfPGDAttack, TinyImages
-
+import utils.svhn_loader as svhn
 # used for logging to TensorBoard
 from tensorboard_logger import configure, log_value
 
@@ -135,9 +135,7 @@ def main():
             batch_size=args.batch_size, shuffle=True, **kwargs)
 
         lr_schedule=[50, 75, 90]
-
         pool_size = args.pool_size
-
         num_classes = 10
     elif args.in_dataset == "CIFAR-100":
         # Data loading code
@@ -152,11 +150,25 @@ def main():
             batch_size=args.batch_size, shuffle=True, **kwargs)
 
         lr_schedule=[50, 75, 90]
-
         pool_size = args.pool_size
-
         num_classes = 100
+    elif args.in_dataset == "SVHN":
+        # Data loading code
+        normalizer = None
+        train_loader = torch.utils.data.DataLoader(
+            svhn.SVHN('datasets/svhn/', split='train',
+                                      transform=transforms.ToTensor(), download=False),
+            batch_size=args.batch_size, shuffle=True, **kwargs)
+        val_loader = torch.utils.data.DataLoader(
+            svhn.SVHN('datasets/svhn/', split='test',
+                                  transform=transforms.ToTensor(), download=False),
+            batch_size=args.batch_size, shuffle=False, **kwargs)
 
+        args.epochs = 20
+        args.save_epoch = 2
+        lr_schedule=[10, 15, 18]
+        pool_size = int(len(train_loader.dataset) * 8 / args.ood_batch_size) + 1
+        num_classes = 10
 
     ood_dataset_size = len(train_loader.dataset) * 2
 

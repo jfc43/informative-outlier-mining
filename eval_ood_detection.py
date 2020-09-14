@@ -19,7 +19,6 @@ import models.gmm as gmmlib
 import utils.svhn_loader as svhn
 import numpy as np
 import time
-#import lmdb
 from scipy import misc
 from utils import OODScoreLinfPGDAttack, ConfidenceLinfPGDAttack, MahalanobisLinfPGDAttack, SOFLLinfPGDAttack, metric, sample_estimator, get_Mahalanobis_score, gen_corruction_image
 
@@ -88,12 +87,15 @@ def get_sofl_score(inputs, model, method_args):
 
     return scores
 
-def get_rowl_score(inputs, model, method_args):
+def get_rowl_score(inputs, model, method_args, raw_score=False):
     num_classes = method_args['num_classes']
     with torch.no_grad():
         outputs = model(inputs)
-    #scores = -F.softmax(outputs, dim=1)[:, num_classes]
-    scores = -1.0 * (outputs.argmax(dim=1)==num_classes).float().detach().cpu().numpy()
+
+    if raw_score:
+        scores = -F.softmax(outputs, dim=1)[:, num_classes]
+    else:
+        scores = -1.0 * (outputs.argmax(dim=1)==num_classes).float().detach().cpu().numpy()
 
     return scores
 
@@ -156,7 +158,7 @@ def get_mahalanobis_score(inputs, model, method_args):
 
     return scores
 
-def get_score(inputs, model, method, method_args):
+def get_score(inputs, model, method, method_args, raw_score=False):
     if method == "msp":
         scores = get_msp_score(inputs, model, method_args)
     elif method == "odin":
@@ -166,7 +168,7 @@ def get_score(inputs, model, method, method_args):
     elif method == "sofl":
         scores = get_sofl_score(inputs, model, method_args)
     elif method == "rowl":
-        scores = get_rowl_score(inputs, model, method_args)
+        scores = get_rowl_score(inputs, model, method_args, raw_score)
     elif method == "atom":
         scores = get_atom_score(inputs, model, method_args)
 
@@ -176,7 +178,7 @@ def corrupt_attack(x, model, method, method_args, in_distribution, severity_leve
 
     x = x.detach().clone()
 
-    scores = get_score(x, model, method, method_args)
+    scores = get_score(x, model, method, method_args, raw_score=True)
 
     worst_score = scores.copy()
     worst_x = x.clone()
@@ -185,7 +187,7 @@ def corrupt_attack(x, model, method, method_args, in_distribution, severity_leve
 
     for curr_x in xs:
         curr_x = curr_x.cuda()
-        scores = get_score(curr_x, model, method, method_args)
+        scores = get_score(curr_x, model, method, method_args, raw_score=True)
 
         if in_distribution:
             cond = scores < worst_score
@@ -211,26 +213,32 @@ def eval_ood_detector(base_dir, in_dataset, out_datasets, batch_size, method, me
     if not os.path.exists(in_save_dir):
         os.makedirs(in_save_dir)
 
-    start = time.time()
-
     transform = transforms.Compose([
         transforms.ToTensor(),
     ])
 
-    if args.in_dataset == "CIFAR-10":
+    if in_dataset == "CIFAR-10":
         normalizer = transforms.Normalize((125.3/255, 123.0/255, 113.9/255), (63.0/255, 62.1/255.0, 66.7/255.0))
         testset = torchvision.datasets.CIFAR10(root='./datasets/cifar10', train=False, download=True, transform=transform)
         testloaderIn = torch.utils.data.DataLoader(testset, batch_size=batch_size,
                                          shuffle=True, num_workers=2)
         num_classes = 10
         num_reject_classes = 5
-    elif args.in_dataset == "CIFAR-100":
+    elif in_dataset == "CIFAR-100":
         normalizer = transforms.Normalize((125.3/255, 123.0/255, 113.9/255), (63.0/255, 62.1/255.0, 66.7/255.0))
         testset = torchvision.datasets.CIFAR100(root='./datasets/cifar100', train=False, download=True, transform=transform)
         testloaderIn = torch.utils.data.DataLoader(testset, batch_size=batch_size,
                                          shuffle=True, num_workers=2)
         num_classes = 100
         num_reject_classes = 10
+    elif in_dataset == "SVHN":
+        normalizer = None
+        testset = svhn.SVHN('datasets/svhn/', split='test',
+                              transform=transforms.ToTensor(), download=False)
+        testloaderIn = torch.utils.data.DataLoader(testset, batch_size=batch_size,
+                                         shuffle=True, num_workers=2)
+        num_classes = 10
+        num_reject_classes = 5
 
     if method != "sofl":
         num_reject_classes = 0
@@ -251,12 +259,19 @@ def eval_ood_detector(base_dir, in_dataset, out_datasets, batch_size, method, me
         gmm_out = torch.load("checkpoints/{in_dataset}/{name}/".format(in_dataset=args.in_dataset, name=args.name) + 'out_gmm.pth.tar')
         gmm_out.alpha = nn.Parameter(gmm.alpha)
         whole_model = gmmlib.DoublyRobustModel(model, gmm, gmm_out, loglam = 0., dim=3072, classes=num_classes)
+    elif args.model_arch == 'wideresnet_ccu':
+        model = wn.WideResNet(args.depth, num_classes + num_reject_classes, widen_factor=args.width, normalizer=normalizer)
+        gmm = torch.load("checkpoints/{in_dataset}/{name}/".format(in_dataset=args.in_dataset, name=args.name) + 'in_gmm.pth.tar')
+        gmm.alpha = nn.Parameter(gmm.alpha)
+        gmm_out = torch.load("checkpoints/{in_dataset}/{name}/".format(in_dataset=args.in_dataset, name=args.name) + 'out_gmm.pth.tar')
+        gmm_out.alpha = nn.Parameter(gmm.alpha)
+        whole_model = gmmlib.DoublyRobustModel(model, gmm, gmm_out, loglam = 0., dim=3072, classes=num_classes)
     else:
         assert False, 'Not supported model arch: {}'.format(args.model_arch)
 
     checkpoint = torch.load("./checkpoints/{in_dataset}/{name}/checkpoint_{epochs}.pth.tar".format(in_dataset=in_dataset, name=name, epochs=epochs))
 
-    if args.model_arch == 'densenet_ccu':
+    if args.model_arch == 'densenet_ccu' or args.model_arch == 'wideresnet_ccu':
         whole_model.load_state_dict(checkpoint['state_dict'])
     else:
         model.load_state_dict(checkpoint['state_dict'])
@@ -392,8 +407,7 @@ def eval_ood_detector(base_dir, in_dataset, out_datasets, batch_size, method, me
             curr_batch_size = images.shape[0]
 
             if adv:
-                adv_images = attack_out.perturb(images)
-                inputs = adv_images
+                inputs = attack_out.perturb(images)
             elif corrupt:
                 inputs = corrupt_attack(images, model, method, method_args, False, adv_args['severity_level'])
             elif adv_corrupt:
@@ -434,10 +448,22 @@ if __name__ == '__main__':
         eval_ood_detector(args.base_dir, args.in_dataset, out_datasets, args.batch_size, args.method, method_args, args.name, args.epochs, args.adv, args.corrupt, args.adv_corrupt, adv_args, mode_args)
     elif args.method == "odin":
         method_args['temperature'] = 1000.0
-        if args.in_dataset == "CIFAR-10":
-            method_args['magnitude'] = 0.0014
-        elif args.in_dataset == "CIFAR-100":
-            method_args['magnitude'] = 0.0028
+        if args.model_arch == 'densenet':
+            if args.in_dataset == "CIFAR-10":
+                method_args['magnitude'] = 0.0016
+            elif args.in_dataset == "CIFAR-100":
+                method_args['magnitude'] = 0.0012
+            elif args.in_dataset == "SVHN":
+                method_args['magnitude'] = 0.0006
+        elif args.model_arch == 'wideresnet':
+            if args.in_dataset == "CIFAR-10":
+                method_args['magnitude'] = 0.0006
+            elif args.in_dataset == "CIFAR-100":
+                method_args['magnitude'] = 0.0012
+            elif args.in_dataset == "SVHN":
+                method_args['magnitude'] = 0.0002
+        else:
+            assert False, 'Not supported model arch'
 
         eval_ood_detector(args.base_dir, args.in_dataset, out_datasets, args.batch_size, args.method, method_args, args.name, args.epochs, args.adv, args.corrupt, args.adv_corrupt, adv_args, mode_args)
     elif args.method == 'mahalanobis':
