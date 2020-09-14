@@ -93,7 +93,7 @@ def get_rowl_score(inputs, model, method_args, raw_score=False):
         outputs = model(inputs)
 
     if raw_score:
-        scores = -F.softmax(outputs, dim=1)[:, num_classes]
+        scores = -1.0 * F.softmax(outputs, dim=1)[:, num_classes].float().detach().cpu().numpy()
     else:
         scores = -1.0 * (outputs.argmax(dim=1)==num_classes).float().detach().cpu().numpy()
 
