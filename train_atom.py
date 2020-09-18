@@ -240,14 +240,16 @@ def main():
 def select_ood(ood_loader, model, batch_size, num_classes, pool_size, ood_dataset_size, quantile):
 
     # start at a random point of the outlier dataset; this induces more randomness without obliterating locality
-    ood_loader.dataset.offset = np.random.randint(len(ood_loader.dataset))
+    offset = np.random.randint(len(ood_loader.dataset))
+    while offset>=0 and offset<10000:
+        offset = np.random.randint(len(ood_loader.dataset))
+
+    ood_loader.dataset.offset = offset
 
     out_iter = iter(ood_loader)
-
     print('Start selecting OOD samples...')
 
     start = time.time()
-
     # select ood samples
     model.eval()
     with torch.no_grad():
