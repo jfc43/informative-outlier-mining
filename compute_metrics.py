@@ -25,9 +25,6 @@ np.random.seed(1)
 def cal_metric(known, novel, method):
     tp, fp, fpr_at_tpr95 = get_curve(known, novel, method)
     results = dict()
-    mtypes = ['FPR', 'AUROC', 'DTERR', 'AUIN', 'AUOUT']
-
-    results = dict()
 
     # FPR
     mtype = 'FPR'
@@ -171,7 +168,6 @@ def compute_traditional_ood(base_dir, in_dataset, out_datasets, method, name):
     for out_dataset in out_datasets:
         novel = np.loadtxt('{base_dir}/{in_dataset}/{method}/{name}/nat/{out_dataset}/out_scores.txt'.format(base_dir=base_dir, in_dataset=in_dataset, method=method, name=name, out_dataset=out_dataset), delimiter='\n')
 
-        in_cond = (novel>threshold).astype(np.float32)
         total += novel.shape[0]
 
         results = cal_metric(known, novel, method)
@@ -199,10 +195,7 @@ def compute_in(base_dir, in_dataset, method, name):
 
     nat_in_cond = (known_nat>threshold).astype(np.float32)
     nat_correct = (known_nat_label[:,0] == known_nat_label[:,1]).astype(np.float32)
-    nat_conf = np.mean(known_nat_label[:,2])
-    known_nat_cond_acc = np.sum(nat_correct * nat_in_cond) / max(np.sum(nat_in_cond), 1)
     known_nat_acc = np.mean(nat_correct)
-    known_nat_cond_fnr = np.sum(nat_correct * (1.0 - nat_in_cond)) / max(np.sum(nat_correct),1)
     known_nat_fnr = np.mean((1.0 - nat_in_cond))
     known_nat_eteacc = np.mean(nat_correct * nat_in_cond)
 
@@ -234,7 +227,6 @@ def compute_adv_ood(base_dir, in_dataset, out_datasets, method, name, epsilon):
     for out_dataset in out_datasets:
         novel_adv = np.loadtxt('{base_dir}/{in_dataset}/{method}/{name}/adv/{epsilon}/{out_dataset}/out_scores.txt'.format(base_dir=base_dir, in_dataset=in_dataset, method=method, name=name, out_dataset=out_dataset, epsilon=epsilon), delimiter='\n')
 
-        in_cond = (novel_adv>threshold).astype(np.float32)
         total += novel_adv.shape[0]
 
         known = known_nat
@@ -271,7 +263,6 @@ def compute_corrupt_ood(base_dir, in_dataset, out_datasets, method, name):
     for out_dataset in out_datasets:
         novel_adv = np.loadtxt('{base_dir}/{in_dataset}/{method}/{name}/corrupt/{out_dataset}/out_scores.txt'.format(base_dir=base_dir, in_dataset=in_dataset, method=method, name=name, out_dataset=out_dataset), delimiter='\n')
 
-        in_cond = (novel_adv>threshold).astype(np.float32)
         total += novel_adv.shape[0]
 
         known = known_nat
@@ -308,7 +299,6 @@ def compute_adv_corrupt_ood(base_dir, in_dataset, out_datasets, method, name, ep
     for out_dataset in out_datasets:
         novel_adv = np.loadtxt('{base_dir}/{in_dataset}/{method}/{name}/adv_corrupt/{epsilon}/{out_dataset}/out_scores.txt'.format(base_dir=base_dir, in_dataset=in_dataset, method=method, name=name, out_dataset=out_dataset, epsilon=epsilon), delimiter='\n')
 
-        in_cond = (novel_adv>threshold).astype(np.float32)
         total += novel_adv.shape[0]
 
         known = known_nat

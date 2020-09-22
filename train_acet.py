@@ -301,7 +301,6 @@ def train_acet(train_loader_in, train_loader_out, model, criterion, ood_criterio
 
     # log to TensorBoard
     if args.tensorboard:
-        log_value('nat_train_loss', nat_losses.avg, epoch)
         log_value('nat_train_acc', nat_top1.avg, epoch)
 
 def validate(val_loader, model, criterion, epoch):

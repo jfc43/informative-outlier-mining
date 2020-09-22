@@ -217,9 +217,6 @@ def train(train_loader, model, criterion, optimizer, epoch):
     nat_losses = AverageMeter()
     nat_top1 = AverageMeter()
 
-    adv_losses = AverageMeter()
-    adv_top1 = AverageMeter()
-
     # switch to train mode
     model.train()
 
