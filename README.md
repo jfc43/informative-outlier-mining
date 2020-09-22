@@ -55,6 +55,7 @@ tar -xvzf LSUN.tar.gz
 * `train_sofl.py`: train SOFL model.
 * `train.py`: train normal model.
 * `tune_mahalanobis_hyperparams.py`: tune hyperparameters of Mahalanobis detector.
+* `tune_odin_hyperparams.py`: tune hyperparameters of ODIN detector.
 
 ### Example
 For CIFAR-10 experiments, you can run the following commands to get results.
@@ -82,6 +83,10 @@ For CIFAR-10 experiments, you can run the following commands to get results.
 * train an ROWL model:
 
 `python train_rowl.py --name ROWL`
+
+* train an NTOM model:
+
+`python train_ntom.py --name NTOM`
 
 * train an ATOM model:
 
@@ -169,6 +174,16 @@ For CIFAR-10 experiments, you can run the following commands to get results.
 
 `python eval_ood_detection.py --name ROWL --method rowl --adv-corrupt`
 
+* Evaluate NTOM:
+
+`python eval_ood_detection.py --name NTOM --method ntom`
+
+`python eval_ood_detection.py --name NTOM --method ntom --corrupt`
+
+`python eval_ood_detection.py --name NTOM --method ntom --adv`
+
+`python eval_ood_detection.py --name NTOM --method ntom --adv-corrupt`
+
 * Evaluate ATOM:
 
 `python eval_ood_detection.py --name ATOM --method atom`
@@ -196,5 +211,7 @@ For CIFAR-10 experiments, you can run the following commands to get results.
 `python compute_metrics.py --name CCU --method msp`
 
 `python compute_metrics.py --name ROWL --method rowl`
+
+`python compute_metrics.py --name NTOM --method ntom`
 
 `python compute_metrics.py --name ATOM --method atom`

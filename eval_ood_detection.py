@@ -99,13 +99,11 @@ def get_rowl_score(inputs, model, method_args, raw_score=False):
 
     return scores
 
-def get_atom_score(inputs, model, method_args):
-    num_classes = method_args['num_classes']
+def get_ood_score(inputs, model, method_args):
     with torch.no_grad():
         outputs = model(inputs)
-    #scores = -F.softmax(outputs, dim=1)[:, num_classes]
-    scores = -1.0 * (F.softmax(outputs, dim=1)[:,-1]).float().detach().cpu().numpy()
 
+    scores = -1.0 * (F.softmax(outputs, dim=1)[:,-1]).float().detach().cpu().numpy()
     return scores
 
 def get_odin_score(inputs, model, method_args):
@@ -169,8 +167,10 @@ def get_score(inputs, model, method, method_args, raw_score=False):
         scores = get_sofl_score(inputs, model, method_args)
     elif method == "rowl":
         scores = get_rowl_score(inputs, model, method_args, raw_score)
+    elif method == "ntom":
+        scores = get_ood_score(inputs, model, method_args)
     elif method == "atom":
-        scores = get_atom_score(inputs, model, method_args)
+        scores = get_ood_score(inputs, model, method_args)
 
     return scores
 
@@ -243,7 +243,7 @@ def eval_ood_detector(base_dir, in_dataset, out_datasets, batch_size, method, me
     if method != "sofl":
         num_reject_classes = 0
 
-    if method == "rowl" or method == "atom":
+    if method == "rowl" or method == "atom" or method=="ntom":
         num_reject_classes = 1
 
     method_args['num_classes'] = num_classes
@@ -307,7 +307,7 @@ def eval_ood_detector(base_dir, in_dataset, out_datasets, batch_size, method, me
             attack_out = OODScoreLinfPGDAttack(model, eps=epsilon, nb_iter=iters,
             eps_iter=iter_size, rand_init=True, clip_min=0., clip_max=1.,
             num_classes = num_classes)
-        elif method == "atom":
+        elif method == "atom" or method=="ntom":
             attack_out = OODScoreLinfPGDAttack(model, eps=epsilon, nb_iter=iters,
             eps_iter=iter_size, rand_init=True, clip_min=0., clip_max=1.,
             num_classes = num_classes)
@@ -481,6 +481,8 @@ if __name__ == '__main__':
     elif args.method == 'sofl':
         eval_ood_detector(args.base_dir, args.in_dataset, out_datasets, args.batch_size, args.method, method_args, args.name, args.epochs, args.adv, args.corrupt, args.adv_corrupt, adv_args, mode_args)
     elif args.method == 'rowl':
+        eval_ood_detector(args.base_dir, args.in_dataset, out_datasets, args.batch_size, args.method, method_args, args.name, args.epochs, args.adv, args.corrupt, args.adv_corrupt, adv_args, mode_args)
+    elif args.method == 'ntom':
         eval_ood_detector(args.base_dir, args.in_dataset, out_datasets, args.batch_size, args.method, method_args, args.name, args.epochs, args.adv, args.corrupt, args.adv_corrupt, adv_args, mode_args)
     elif args.method == 'atom':
         eval_ood_detector(args.base_dir, args.in_dataset, out_datasets, args.batch_size, args.method, method_args, args.name, args.epochs, args.adv, args.corrupt, args.adv_corrupt, adv_args, mode_args)
