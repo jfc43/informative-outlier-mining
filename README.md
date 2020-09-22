@@ -12,6 +12,7 @@ It is tested under Ubuntu Linux 16.04.1 and Python 3.6 environment, and requries
 * [sklearn](https://scikit-learn.org/stable/)
 
 ## Downloading In-distribution Dataset
+* [SVHN](http://ufldl.stanford.edu/housenumbers/): need to download Format 2 data. 
 * [CIFAR](https://www.cs.toronto.edu/~kriz/cifar.html): included in PyTorch.
 
 ## Downloading Auxiliary Unlabeled Dataset
@@ -39,6 +40,10 @@ cd datasets/ood_datasets
 wget https://www.dropbox.com/s/fhtsw1m3qxlwj6h/LSUN.tar.gz
 tar -xvzf LSUN.tar.gz
 ```
+
+## Downloading Pre-trained Models
+
+We provide pre-trained DenseNet models for normal, SOFL, OE, ACET, CCU, ROWL, NTOM, and ATOM methods on SVHN, CIFAR-10, and CIFAR-100 datasets. They can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1RdeO5zdmIZY5aExlV7q1jfzDTFgU1Xrr?usp=sharing). 
 
 ## Overview of the Code
 ### Running Experiments
