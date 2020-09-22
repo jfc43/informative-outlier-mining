@@ -201,8 +201,6 @@ def main():
         else:
             assert False, "=> no checkpoint found at '{}'".format(args.resume)
 
-    attack_out = LinfPGDAttack(model = model, eps=args.epsilon, nb_iter=args.iters, eps_iter=args.iter_size, targeted=False, rand_init=True, num_classes=num_classes+1, loss_func='CE', elementwise_best=True)
-
     # get the number of model parameters
     print('Number of model parameters: {}'.format(
         sum([p.data.nelement() for p in model.parameters()])))
@@ -225,7 +223,7 @@ def main():
         # train for one epoch
         selected_ood_loader = select_ood(ood_loader, model, args.batch_size * 2, num_classes, pool_size, ood_dataset_size, args.quantile)
 
-        train_atom(train_loader, selected_ood_loader, model, criterion, num_classes, optimizer, epoch, attack_out)
+        train_ntom(train_loader, selected_ood_loader, model, criterion, num_classes, optimizer, epoch)
 
         # evaluate on validation set
         prec1 = validate(val_loader, model, criterion, epoch, num_classes)
@@ -294,7 +292,7 @@ def select_ood(ood_loader, model, batch_size, num_classes, pool_size, ood_datase
     return ood_train_loader
 
 
-def train_atom(train_loader_in, train_loader_out, model, criterion, num_classes, optimizer, epoch, attack_out):
+def train_ntom(train_loader_in, train_loader_out, model, criterion, num_classes, optimizer, epoch):
     """Train for one epoch on the training set"""
     batch_time = AverageMeter()
 
@@ -320,11 +318,9 @@ def train_atom(train_loader_in, train_loader_out, model, criterion, num_classes,
         out_target = out_set[1]
         out_target = out_target.cuda()
 
-        adv_out_input = attack_out.perturb(out_input[int(out_len/2):], out_target[int(out_len/2):])
-
         model.train()
 
-        cat_input = torch.cat((in_input, out_input[:int(out_len/2)], adv_out_input), 0)
+        cat_input = torch.cat((in_input, out_input), 0)
         cat_output = model(cat_input)
 
         in_output = cat_output[:in_len]
@@ -409,6 +405,7 @@ def validate(val_loader, model, criterion, epoch, num_classes):
     if args.tensorboard:
         log_value('val_loss', losses.avg, epoch)
         log_value('val_acc', top1.avg, epoch)
+        
     return top1.avg
 
 def save_checkpoint(state, epoch):
