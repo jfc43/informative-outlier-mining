@@ -1,5 +1,5 @@
 # Robust Out-of-distribution Detection via Informative Outlier Mining
-This project is for the paper: Robust Out-of-distribution Detection via Informative Outlier Mining. Some codes are from [ODIN](https://github.com/facebookresearch/odin), [Outlier Exposure](https://github.com/hendrycks/outlier-exposure), [Deep Mahalanobis Detector](https://github.com/pokaxpoka/deep_Mahalanobis_detector), [Corruption and Perturbation Robustness](https://github.com/hendrycks/robustness) and [Certified Certain Uncertainty](https://github.com/AlexMeinke/certified-certain-uncertainty).
+This project is for the paper: [Robust Out-of-distribution Detection via Informative Outlier Mining](https://arxiv.org/abs/2006.15207). Some codes are from [ODIN](https://github.com/facebookresearch/odin), [Outlier Exposure](https://github.com/hendrycks/outlier-exposure), [Deep Mahalanobis Detector](https://github.com/pokaxpoka/deep_Mahalanobis_detector), [Corruption and Perturbation Robustness](https://github.com/hendrycks/robustness) and [Certified Certain Uncertainty](https://github.com/AlexMeinke/certified-certain-uncertainty).
 
 ## Experimental Results
 ![Main Results](performance.png)
