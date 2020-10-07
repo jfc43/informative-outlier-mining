@@ -20,7 +20,7 @@ import numpy as np
 
 import models.densenet as dn
 import models.wideresnet as wn
-from utils import LinfPGDAttack, TinyImages
+from utils import LinfPGDAttack, TinyImages, ImageNet
 import utils.svhn_loader as svhn
 # used for logging to TensorBoard
 from tensorboard_logger import configure, log_value
@@ -30,6 +30,8 @@ parser.add_argument('--gpu', default='0', type=str, help='which gpu to use')
 
 parser.add_argument('--in-dataset', default="CIFAR-10", type=str, help='in-distribution dataset')
 parser.add_argument('--model-arch', default='densenet', type=str, help='model architecture')
+parser.add_argument('--auxiliary-dataset', default='80m_tiny_images', 
+                    choices=['80m_tiny_images', 'imagenet'], type=str, help='which auxiliary dataset to use')
 
 parser.add_argument('--quantile', default=0.125, type=float, help='quantile')
 
@@ -174,11 +176,19 @@ def main():
 
     print('OOD Dataset Size: ', ood_dataset_size)
 
-    ood_loader = torch.utils.data.DataLoader(
-        TinyImages(transform=transforms.Compose(
-            [transforms.ToTensor(), transforms.ToPILImage(), transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(), transforms.ToTensor()])),
-            batch_size=args.ood_batch_size, shuffle=False, **kwargs)
+    if args.auxiliary_dataset == '80m_tiny_images':
+        ood_loader = torch.utils.data.DataLoader(
+            TinyImages(transform=transforms.Compose(
+                [transforms.ToTensor(), transforms.ToPILImage(), transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(), transforms.ToTensor()])),
+                batch_size=args.ood_batch_size, shuffle=False, **kwargs)
+    elif args.auxiliary_dataset == 'imagenet':
+        ood_loader = torch.utils.data.DataLoader(
+            ImageNet(transform=transforms.Compose(
+                [transforms.ToTensor(), transforms.ToPILImage(), transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(), transforms.ToTensor()])),
+                batch_size=args.ood_batch_size, shuffle=False, **kwargs)
+
 
     # create model
     if args.model_arch == 'densenet':
@@ -258,6 +268,10 @@ def select_ood(ood_loader, model, batch_size, num_classes, pool_size, ood_datase
             try:
                 out_set = next(out_iter)
             except StopIteration:
+                offset = np.random.randint(len(ood_loader.dataset))
+                while offset>=0 and offset<10000:
+                    offset = np.random.randint(len(ood_loader.dataset))
+                ood_loader.dataset.offset = offset
                 out_iter = iter(ood_loader)
                 out_set = next(out_iter)
 
@@ -268,8 +282,8 @@ def select_ood(ood_loader, model, batch_size, num_classes, pool_size, ood_datase
             all_ood_input.append(input)
             all_ood_conf.extend(conf.detach().cpu().numpy())
 
-    all_ood_input = torch.cat(all_ood_input, 0)
-    all_ood_conf = np.array(all_ood_conf)
+    all_ood_input = torch.cat(all_ood_input, 0)[:ood_dataset_size*4]
+    all_ood_conf = np.array(all_ood_conf)[:ood_dataset_size*4]
     indices = np.argsort(all_ood_conf)
 
     N = all_ood_input.shape[0]

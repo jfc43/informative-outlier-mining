@@ -1,5 +1,5 @@
-# Robust Out-of-distribution Detection via Informative Outlier Mining
-This project is for the paper: [Robust Out-of-distribution Detection via Informative Outlier Mining](https://arxiv.org/abs/2006.15207). Some codes are from [ODIN](https://github.com/facebookresearch/odin), [Outlier Exposure](https://github.com/hendrycks/outlier-exposure), [Deep Mahalanobis Detector](https://github.com/pokaxpoka/deep_Mahalanobis_detector), [Corruption and Perturbation Robustness](https://github.com/hendrycks/robustness) and [Certified Certain Uncertainty](https://github.com/AlexMeinke/certified-certain-uncertainty).
+# Informative Outlier Matters: Robustifying Out-of-distribution Detection Using Outlier Mining
+This project is for the paper: [Informative Outlier Matters: Robustifying Out-of-distribution Detection Using Outlier Mining](https://arxiv.org/abs/2006.15207). Some codes are from [ODIN](https://github.com/facebookresearch/odin), [Outlier Exposure](https://github.com/hendrycks/outlier-exposure), [Deep Mahalanobis Detector](https://github.com/pokaxpoka/deep_Mahalanobis_detector), [Corruption and Perturbation Robustness](https://github.com/hendrycks/robustness) and [Certified Certain Uncertainty](https://github.com/AlexMeinke/certified-certain-uncertainty).
 
 ## Experimental Results
 ![Main Results](performance.png)
@@ -15,13 +15,14 @@ It is tested under Ubuntu Linux 16.04.1 and Python 3.6 environment, and requries
 * [SVHN](http://ufldl.stanford.edu/housenumbers/): need to download Format 2 data. 
 * [CIFAR](https://www.cs.toronto.edu/~kriz/cifar.html): included in PyTorch.
 
-## Downloading Auxiliary Unlabeled Dataset
+## Downloading Auxiliary OOD Datasets
 
-To download **80 Million Tiny Images** dataset. In the **root** directory, run
+* [80 Million Tiny Images](https://groups.csail.mit.edu/vision/TinyImages/): to download **80 Million Tiny Images** dataset. In the **root** directory, run
 ```
 cd datasets/unlabeled_datasets/80M_Tiny_Images
 wget http://horatio.cs.nyu.edu/mit/tiny/data/tiny_images.bin
 ```
+* [Downsampled ImageNet Datasets](https://patrykchrabaszcz.github.io/Imagenet32/): we use the ImageNet64x64, which could be downloaded from [ImageNet Website](http://image-net.org/download-images). After downloading it, place it in this directory: `datasets/unlabeled_datasets/ImageNet`. 
 
 ## Downloading Out-of-distribution Test Datasets
 

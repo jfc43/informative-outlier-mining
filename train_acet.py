@@ -20,7 +20,7 @@ import numpy as np
 
 import models.densenet as dn
 import models.wideresnet as wn
-from utils import LinfPGDAttack, TinyImages
+from utils import LinfPGDAttack, TinyImages, ImageNet
 import utils.svhn_loader as svhn
 # used for logging to TensorBoard
 from tensorboard_logger import configure, log_value
@@ -30,6 +30,8 @@ parser.add_argument('--gpu', default='0', type=str, help='which gpu to use')
 
 parser.add_argument('--in-dataset', default="CIFAR-10", type=str, help='in-distribution dataset')
 parser.add_argument('--model-arch', default='densenet', type=str, help='model architecture')
+parser.add_argument('--auxiliary-dataset', default='80m_tiny_images', 
+                    choices=['80m_tiny_images', 'imagenet'], type=str, help='which auxiliary dataset to use')
 
 parser.add_argument('--epsilon', default=8.0, type=float, help='epsilon')
 parser.add_argument('--iters', default=5, type=int,
@@ -160,11 +162,18 @@ def main():
         lr_schedule=[10, 15, 18]
         num_classes = 10
 
-    ood_loader = torch.utils.data.DataLoader(
-    TinyImages(transform=transforms.Compose(
-        [transforms.ToTensor(), transforms.ToPILImage(), transforms.RandomCrop(32, padding=4),
-         transforms.RandomHorizontalFlip(), transforms.ToTensor()])),
-        batch_size=args.ood_batch_size, shuffle=False, **kwargs)
+    if args.auxiliary_dataset == '80m_tiny_images':
+        ood_loader = torch.utils.data.DataLoader(
+        TinyImages(transform=transforms.Compose(
+            [transforms.ToTensor(), transforms.ToPILImage(), transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(), transforms.ToTensor()])),
+            batch_size=args.ood_batch_size, shuffle=False, **kwargs)
+    elif args.auxiliary_dataset == 'imagenet':
+        ood_loader = torch.utils.data.DataLoader(
+        ImageNet(transform=transforms.Compose(
+            [transforms.ToTensor(), transforms.ToPILImage(), transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(), transforms.ToTensor()])),
+            batch_size=args.ood_batch_size, shuffle=False, **kwargs)
 
     # create model
     if args.model_arch == 'densenet':
