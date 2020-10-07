@@ -1,6 +1,9 @@
 # Informative Outlier Matters: Robustifying Out-of-distribution Detection Using Outlier Mining
 This project is for the paper: [Informative Outlier Matters: Robustifying Out-of-distribution Detection Using Outlier Mining](https://arxiv.org/abs/2006.15207). Some codes are from [ODIN](https://github.com/facebookresearch/odin), [Outlier Exposure](https://github.com/hendrycks/outlier-exposure), [Deep Mahalanobis Detector](https://github.com/pokaxpoka/deep_Mahalanobis_detector), [Corruption and Perturbation Robustness](https://github.com/hendrycks/robustness) and [Certified Certain Uncertainty](https://github.com/AlexMeinke/certified-certain-uncertainty).
 
+## Illustration
+![ATOM banner](ATOM-banner.png)
+
 ## Experimental Results
 ![Main Results](performance.png)
 
@@ -65,10 +68,13 @@ We provide pre-trained DenseNet models for vanilla, SOFL, OE, ACET, CCU, ROWL, N
 
 ### Example
 For CIFAR-10 experiments, you can run the following script to get the results: 
+
 `./run_all_cifar10_exps.sh`
 
 To evaluate a OOD detection method, you can use the following command: 
+
 `python eval_ood_detection.py --in-dataset {in-distribution dataset} --name {model name} --method {scoring function} [--adv or --corrupt or --adv-corrupt]`
+
 The argument `--adv` is to evaluate L_inf OOD, `--corrupt` is to evaluate corrupted OOD, `--adv-corrupt` is to evaluate Comp. OOD. You can only specify one of them. Without them, it will evaluate natural OOD. 
 
 ### Citation 
