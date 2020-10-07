@@ -44,7 +44,7 @@ tar -xvzf LSUN.tar.gz
 
 ## Downloading Pre-trained Models
 
-We provide pre-trained DenseNet models for normal, SOFL, OE, ACET, CCU, ROWL, NTOM, and ATOM methods on SVHN, CIFAR-10, and CIFAR-100 datasets using TinyImages as auxiliary OOD dataset. They can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1RdeO5zdmIZY5aExlV7q1jfzDTFgU1Xrr?usp=sharing). 
+We provide pre-trained DenseNet models for vanilla, SOFL, OE, ACET, CCU, ROWL, NTOM, and ATOM methods on SVHN, CIFAR-10, and CIFAR-100 datasets using TinyImages as auxiliary OOD dataset. They can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1RdeO5zdmIZY5aExlV7q1jfzDTFgU1Xrr?usp=sharing). 
 
 ## Overview of the Code
 ### Running Experiments
@@ -59,165 +59,25 @@ We provide pre-trained DenseNet models for normal, SOFL, OE, ACET, CCU, ROWL, NT
 * `train_oe.py`: train OE model.
 * `train_rowl.py`: train ROWL model.
 * `train_sofl.py`: train SOFL model.
-* `train.py`: train normal model.
+* `train.py`: train vanilla model.
 * `tune_mahalanobis_hyperparams.py`: tune hyperparameters of Mahalanobis detector.
 * `tune_odin_hyperparams.py`: tune hyperparameters of ODIN detector.
 
 ### Example
-For CIFAR-10 experiments, you can run the following commands to get results.
-
-* train an normal model:
-
-`python train.py --name normal`
-
-* train an SOFL model:
-
-`python train_sofl.py --name SOFL`
-
-* train an OE model:
-
-`python train_oe.py --name OE`
-
-* train an ACET model:
-
-`python train_acet.py --name ACET`
-
-* train an CCU model:
-
-`python train_ccu.py --name CCU`
-
-* train an ROWL model:
-
-`python train_rowl.py --name ROWL`
-
-* train an NTOM model:
-
-`python train_ntom.py --name NTOM`
-
-* train an ATOM model:
-
-`python train_atom.py --name ATOM`
-
-* Evaluate MSP:
-
-`python eval_ood_detection.py --name normal --method msp`
-
-`python eval_ood_detection.py --name normal --method msp --corrupt`
-
-`python eval_ood_detection.py --name normal --method msp --adv`
-
-`python eval_ood_detection.py --name normal --method msp --adv-corrupt`
-
-* Evaluate ODIN:
-
-`python eval_ood_detection.py --name normal --method odin`
-
-`python eval_ood_detection.py --name normal --method odin --corrupt`
-
-`python eval_ood_detection.py --name normal --method odin --adv`
-
-`python eval_ood_detection.py --name normal --method odin --adv-corrupt`
-
-* Evaluate Mahalanobis:
-
-`python tune_mahalanobis_hyperparams.py --name normal`
-
-`python eval_ood_detection.py --name normal --method mahalanobis`
-
-`python eval_ood_detection.py --name normal --method mahalanobis --corrupt`
-
-`python eval_ood_detection.py --name normal --method mahalanobis --adv`
-
-`python eval_ood_detection.py --name normal --method mahalanobis --adv-corrupt`
-
-* Evaluate SOFL:
-
-`python eval_ood_detection.py --name SOFL --method sofl`
-
-`python eval_ood_detection.py --name SOFL --method sofl --corrupt`
-
-`python eval_ood_detection.py --name SOFL --method sofl --adv`
-
-`python eval_ood_detection.py --name SOFL --method sofl --adv-corrupt`
-
-* Evaluate OE:
-
-`python eval_ood_detection.py --name OE --method msp`
-
-`python eval_ood_detection.py --name OE --method msp --corrupt`
-
-`python eval_ood_detection.py --name OE --method msp --adv`
-
-`python eval_ood_detection.py --name OE --method msp --adv-corrupt`
-
-* Evaluate ACET:
-
-`python eval_ood_detection.py --name ACET --method msp`
-
-`python eval_ood_detection.py --name ACET --method msp --corrupt`
-
-`python eval_ood_detection.py --name ACET --method msp --adv`
-
-`python eval_ood_detection.py --name ACET --method msp --adv-corrupt`
-
-* Evaluate CCU:
-
-`python eval_ood_detection.py --name CCU --method msp`
-
-`python eval_ood_detection.py --name CCU --method msp --corrupt`
-
-`python eval_ood_detection.py --name CCU --method msp --adv`
-
-`python eval_ood_detection.py --name CCU --method msp --adv-corrupt`
-
-* Evaluate ROWL:
-
-`python eval_ood_detection.py --name ROWL --method rowl`
-
-`python eval_ood_detection.py --name ROWL --method rowl --corrupt`
-
-`python eval_ood_detection.py --name ROWL --method rowl --adv`
-
-`python eval_ood_detection.py --name ROWL --method rowl --adv-corrupt`
-
-* Evaluate NTOM:
-
-`python eval_ood_detection.py --name NTOM --method ntom`
-
-`python eval_ood_detection.py --name NTOM --method ntom --corrupt`
-
-`python eval_ood_detection.py --name NTOM --method ntom --adv`
-
-`python eval_ood_detection.py --name NTOM --method ntom --adv-corrupt`
-
-* Evaluate ATOM:
-
-`python eval_ood_detection.py --name ATOM --method atom`
-
-`python eval_ood_detection.py --name ATOM --method atom --corrupt`
-
-`python eval_ood_detection.py --name ATOM --method atom --adv`
-
-`python eval_ood_detection.py --name ATOM --method atom --adv-corrupt`
-
-* Compute metrics:
-
-`python compute_metrics.py --name normal --method msp`
-
-`python compute_metrics.py --name normal --method odin`
-
-`python compute_metrics.py --name normal --method mahalanobis`
-
-`python compute_metrics.py --name SOFL --method sofl`
-
-`python compute_metrics.py --name OE --method msp`
-
-`python compute_metrics.py --name ACET --method msp`
-
-`python compute_metrics.py --name CCU --method msp`
-
-`python compute_metrics.py --name ROWL --method rowl`
-
-`python compute_metrics.py --name NTOM --method ntom`
-
-`python compute_metrics.py --name ATOM --method atom`
+For CIFAR-10 experiments, you can run the following script to get the results: 
+`./run_all_cifar10_exps.sh`
+
+To evaluate a OOD detection method, you can use the following command: 
+`python eval_ood_detection.py --in-dataset {in-distribution dataset} --name {model name} --method {scoring function} [--adv or --corrupt or --adv-corrupt]`
+The argument `--adv` is to evaluate L_inf OOD, `--corrupt` is to evaluate corrupted OOD, `--adv-corrupt` is to evaluate Comp. OOD. You can only specify one of them. Without them, it will evaluate natural OOD. 
+
+### Citation 
+Please cite our work if you use the codebase: 
+```
+@article{chen2020informative-outlier-matters,
+title={Informative Outlier Matters: Robustifying Out-of-distribution Detection Using Outlier Mining},
+author={Chen, Jiefeng and Li, Yixuan and Wu, Xi and Liang, Yingyu and Jha, Somesh},
+journal={arXiv preprint arXiv:2006.15207},
+year={2020}
+}
+```

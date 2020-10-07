@@ -25,20 +25,18 @@ from utils import OODScoreLinfPGDAttack, ConfidenceLinfPGDAttack, MahalanobisLin
 parser = argparse.ArgumentParser(description='Pytorch Detecting Out-of-distribution examples in neural networks')
 
 parser.add_argument('--in-dataset', default="CIFAR-10", type=str, help='in-distribution dataset')
-parser.add_argument('--name', required=True, type=str,
-                    help='neural network name and training set')
+parser.add_argument('--name', required=True, type=str, help='model name')
 parser.add_argument('--model-arch', default='densenet', type=str, help='model architecture')
 
-parser.add_argument('--gpu', default = '0', type = str,
-		    help='gpu index')
-parser.add_argument('--adv', help='adv ood', action='store_true')
-parser.add_argument('--corrupt', help='corrupt', action='store_true')
-parser.add_argument('--adv-corrupt', help='adv corrupt', action='store_true')
+parser.add_argument('--gpu', default = '0', type = str, help='gpu index')
+parser.add_argument('--adv', help='L_inf OOD', action='store_true')
+parser.add_argument('--corrupt', help='corrupted OOD', action='store_true')
+parser.add_argument('--adv-corrupt', help='comp. OOD', action='store_true')
 
 parser.add_argument('--in-dist-only', help='only evaluate in-distribution', action='store_true')
 parser.add_argument('--out-dist-only', help='only evaluate out-distribution', action='store_true')
 
-parser.add_argument('--method', default='msp', type=str, help='ood detection method')
+parser.add_argument('--method', default='msp', type=str, help='scoring function')
 parser.add_argument('--cal-metric', help='calculate metric directly', action='store_true')
 
 parser.add_argument('--epsilon', default=8.0, type=float, help='epsilon')
