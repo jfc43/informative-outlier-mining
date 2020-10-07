@@ -106,3 +106,6 @@ journal={arXiv preprint arXiv:2006.15207},
 year={2020}
 }
 ```
+
+### License
+Please refer to the [LICENSE](LICENSE).
