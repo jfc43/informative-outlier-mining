@@ -75,7 +75,7 @@ To evaluate an OOD detection method, you can use the following command:
 
 `python eval_ood_detection.py --in-dataset {in-distribution dataset} --name {model name} --method {scoring function} [--adv or --corrupt or --adv-corrupt]`
 
-The argument `--adv` is to evaluate L_inf OOD, `--corrupt` is to evaluate corrupted OOD, `--adv-corrupt` is to evaluate Comp. OOD. You can only specify one of them. Without them, it will evaluate natural OOD. 
+The argument `--adv` is to evaluate L_inf OOD, `--corrupt` is to evaluate Corrupted OOD, `--adv-corrupt` is to evaluate Comp. OOD. You can only specify one of them. Without them, it will evaluate natural OOD. 
 
 ### Citation 
 Please cite our work if you use the codebase: 
