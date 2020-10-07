@@ -25,7 +25,7 @@ from utils import OODScoreLinfPGDAttack, ConfidenceLinfPGDAttack, MahalanobisLin
 parser = argparse.ArgumentParser(description='Pytorch Detecting Out-of-distribution examples in neural networks')
 
 parser.add_argument('--in-dataset', default="CIFAR-10", type=str, help='in-distribution dataset')
-parser.add_argument('--name', required=True, type=str, help='model name')
+parser.add_argument('--name', required=True, type=str, help='the name of the model trained')
 parser.add_argument('--model-arch', default='densenet', type=str, help='model architecture')
 
 parser.add_argument('--gpu', default = '0', type = str, help='gpu index')
