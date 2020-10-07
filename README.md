@@ -83,7 +83,7 @@ The argument `--adv` is to evaluate L_inf OOD, `--corrupt` is to evaluate Corrup
 
 `{model name}` is the name of the model that you have trained. The model type should match the corresponding scoring function. See the following table for the matchings: 
 
-| model type  | scoring function |
+| Model Type  | Scoring Function |
 | ------------- | ------------- |
 | vanilla  |  msp |
 | vanilla  | odin  |
