@@ -76,11 +76,14 @@ To evaluate an OOD detection method, you can use the following command:
 `python eval_ood_detection.py --in-dataset {in-distribution dataset} --name {model name} --method {scoring function} [--adv or --corrupt or --adv-corrupt]`
 
 The argument `--adv` is to evaluate L_inf OOD, `--corrupt` is to evaluate Corrupted OOD, `--adv-corrupt` is to evaluate Comp. OOD. You can only specify one of them. Without them, it will evaluate natural OOD. 
-`{in-distribution dataset}` can be `SVHN`, `CIFAR-10` or `CIFAR-100`. 
-`{scoring function}` can be `msp`, `odin`, `mahalanobis`, `sofl`, `rowl`, `ntom` or `atom`. 
-`{model name}` is the name of the model that you have trained. It should match the corresponding scoring function. See the following table for the matchings: 
 
-| model name  | scoring function |
+`{in-distribution dataset}` can be `SVHN`, `CIFAR-10` or `CIFAR-100`. 
+
+`{scoring function}` can be `msp`, `odin`, `mahalanobis`, `sofl`, `rowl`, `ntom` or `atom`. 
+
+`{model name}` is the name of the model that you have trained. The model type should match the corresponding scoring function. See the following table for the matchings: 
+
+| model type  | scoring function |
 | ------------- | ------------- |
 | vanilla  |  msp |
 | vanilla  | odin  |
