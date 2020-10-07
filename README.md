@@ -71,7 +71,7 @@ For CIFAR-10 experiments, you can run the following script to get the results:
 
 `./run_all_cifar10_exps.sh`
 
-To evaluate a OOD detection method, you can use the following command: 
+To evaluate an OOD detection method, you can use the following command: 
 
 `python eval_ood_detection.py --in-dataset {in-distribution dataset} --name {model name} --method {scoring function} [--adv or --corrupt or --adv-corrupt]`
 
