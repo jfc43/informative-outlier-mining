@@ -136,17 +136,13 @@ class WideResNet(nn.Module):
             x[:,1,:,:] = (x[:,1,:,:] - self.normalizer.mean[1]) / self.normalizer.std[1]
             x[:,2,:,:] = (x[:,2,:,:] - self.normalizer.mean[2]) / self.normalizer.std[2]
 
+        out = self.conv1(x)
         if layer_index == 1:
-            out = self.conv1(x)
-        elif layer_index == 2:
-            out = self.conv1(x)
             out = self.block1(out)
-        elif layer_index == 3:
-            out = self.conv1(x)
+        elif layer_index == 2:
             out = self.block1(out)
             out = self.block2(out)
-        elif layer_index == 4:
-            out = self.conv1(x)
+        elif layer_index == 3:
             out = self.block1(out)
             out = self.block2(out)
             out = self.block3(out)
@@ -169,5 +165,5 @@ class WideResNet(nn.Module):
         out = F.avg_pool2d(out, 8)
         out = out.view(-1, self.nChannels)
         y = self.fc(out)
-            
+
         return y, penultimate
