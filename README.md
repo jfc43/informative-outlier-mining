@@ -47,7 +47,7 @@ tar -xvzf LSUN.tar.gz
 
 ## Downloading Pre-trained Models
 
-We provide pre-trained DenseNet models for vanilla, SOFL, OE, ACET, CCU, ROWL, NTOM, and ATOM methods on SVHN, CIFAR-10, and CIFAR-100 datasets using TinyImages as auxiliary OOD dataset. They can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1RdeO5zdmIZY5aExlV7q1jfzDTFgU1Xrr?usp=sharing). 
+We provide pre-trained DenseNet models for vanilla, SOFL, OE, ACET, CCU, ROWL, NTOM, and ATOM methods on SVHN, CIFAR-10, and CIFAR-100 datasets using TinyImages as auxiliary OOD dataset. We also provide pre-trained WideResNet models for vanilla, NTOM, and ATOM methods on SVHN, CIFAR-10, and CIFAR-100 datasets using TinyImages as auxiliary OOD dataset. They can be downloaded from [Google Drive](https://drive.google.com/drive/folders/1RdeO5zdmIZY5aExlV7q1jfzDTFgU1Xrr?usp=sharing). 
 
 ## Overview of the Code
 ### Running Experiments
