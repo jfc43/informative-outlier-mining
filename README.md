@@ -1,5 +1,5 @@
-# Informative Outlier Matters: Robustifying Out-of-distribution Detection Using Outlier Mining
-This project is for the paper: [Informative Outlier Matters: Robustifying Out-of-distribution Detection Using Outlier Mining](https://arxiv.org/abs/2006.15207). Some codes are from [ODIN](https://github.com/facebookresearch/odin), [Outlier Exposure](https://github.com/hendrycks/outlier-exposure), [Deep Mahalanobis Detector](https://github.com/pokaxpoka/deep_Mahalanobis_detector), [Corruption and Perturbation Robustness](https://github.com/hendrycks/robustness) and [Certified Certain Uncertainty](https://github.com/AlexMeinke/certified-certain-uncertainty).
+# ATOM: Robustifying Out-of-distribution Detection Using Outlier Mining
+This project is for the paper: [ATOM: Robustifying Out-of-distribution Detection Using Outlier Mining](https://arxiv.org/abs/2006.15207). 
 
 ## Illustration
 ![ATOM banner](ATOM-banner.png)
@@ -95,6 +95,9 @@ The argument `--adv` is to evaluate L_inf OOD, `--corrupt` is to evaluate Corrup
 | ROWL     |  rowl |
 | NTOM     | ntom |
 | ATOM     | atom | 
+
+## Acknowledgements
+Part of this code is inspired by [ODIN](https://github.com/facebookresearch/odin), [Outlier Exposure](https://github.com/hendrycks/outlier-exposure), [Deep Mahalanobis Detector](https://github.com/pokaxpoka/deep_Mahalanobis_detector), [Corruption and Perturbation Robustness](https://github.com/hendrycks/robustness) and [Certified Certain Uncertainty](https://github.com/AlexMeinke/certified-certain-uncertainty).
 
 ### Citation 
 Please cite our work if you use the codebase: 
