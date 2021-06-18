@@ -102,8 +102,8 @@ Part of this code is inspired by [ODIN](https://github.com/facebookresearch/odin
 ## Citation 
 Please cite our work if you use the codebase: 
 ```
-@article{chen2020informative-outlier-matters,
-title={Informative Outlier Matters: Robustifying Out-of-distribution Detection Using Outlier Mining},
+@article{chen2020atom,
+title={ATOM: Robustifying Out-of-distribution Detection Using Outlier Mining},
 author={Chen, Jiefeng and Li, Yixuan and Wu, Xi and Liang, Yingyu and Jha, Somesh},
 journal={arXiv preprint arXiv:2006.15207},
 year={2020}
