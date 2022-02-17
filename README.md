@@ -8,7 +8,7 @@ This project is for the paper: [ATOM: Robustifying Out-of-distribution Detection
 ![Main Results](performance.png)
 
 ## Preliminaries
-It is tested under Ubuntu Linux 16.04.1 and Python 3.6 environment, and requries some packages to be installed:
+It is tested under Ubuntu Linux 16.04.1 and Python 3.6 environment, and requires some packages to be installed:
 * [PyTorch](https://pytorch.org/)
 * [scipy](https://github.com/scipy/scipy)
 * [numpy](http://www.numpy.org/)
